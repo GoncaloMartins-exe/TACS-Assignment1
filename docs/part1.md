@@ -4,7 +4,7 @@
   
 2. **Latin square completation**: given a **N**x**N** board partially filled, complete it so that each value appears once in each row and column.
     - Does'nt have the diagonal restriction.
-________________________________________________________________________
+
 ## Codification
 #### Limit of **12 qubits**
 
@@ -37,4 +37,21 @@ Therefore, with a 12-qubit limit:
 - Maximum number of empty cells: `12 / 2 = 6`
 
 #### (**10 cells pre-filled** and **6 free** -> `12 qubits`).
-________________________________________________________________________
+
+## Tests
+
+### Queens
+
+| . | Q | . | . |
+|---|---|---|---|
+| . | . | . | `Q` |
+| Q | . | . | . |
+| . | . | `Q` | . |
+
+### Latin Square
+
+| 1 | 2 | `3` | 4 |
+|---|---|---|---|
+| 2 | `3` | 4 | 1 |
+| `3` | 4 | 1 | 2 |
+| 4 | `1` | `2` | `3` |
