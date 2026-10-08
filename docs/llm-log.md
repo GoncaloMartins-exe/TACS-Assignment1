@@ -1,0 +1,1 @@
+Used for initial project planning and generating the .gitignore file

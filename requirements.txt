@@ -1,0 +1,6 @@
+# BESSER
+git+https://github.com/jacomecunha/BESSER.git
+
+# Quantum
+qiskit
+qiskit-aer
