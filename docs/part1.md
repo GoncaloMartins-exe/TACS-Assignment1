@@ -61,12 +61,12 @@ Therefore, with a 12-qubit limit:
 ### N-Queens
 The solution always contains one queen per row. Therefore, we can represent $q_r$ as the column of the queen at row `r`. The constraints can then be written as follows (cannot be on the same column nor on the same diagonal):
 
-$$\forall\, r \neq s,\; q_r \neq q_s \land |q_r - q_s| \neq |r-s| $$
+$$\forall r \neq s, q_r \neq q_s \land |q_r - q_s| \neq |r-s| $$
 
 CNF is really verbose. Here's the CNF for N=4:
 
 $$
-One \; queen \; per \; row:
+% One \; queen \; per \; row:
 \newline
 (11 \lor 12 \lor 13 \lor 14) \land (21 \lor 22 \lor 23 \lor 24) \land (31 \lor 32 \lor 33 \lor 34) \land (41 \lor 42 \lor 43 \lor 44)
 \newline
@@ -79,8 +79,10 @@ One \; queen \; per \; row:
 \newline
 \land [(\neg 41 \lor \neg 42) \land (\neg 41 \lor \neg 43) \land (\neg 41 \lor \neg 44) \land (\neg 42 \lor \neg 43) \land (\neg 42 \lor \neg 44) \land (\neg 43 \lor \neg 44)]
 \newline
+$$
 
-One \; queen \; per \; column:
+$$
+% One \; queen \; per \; column:
 \newline
 \land [(\neg 11 \lor \neg 21) \land (\neg 11 \lor \neg 31) \land (\neg 11 \lor \neg 41) \land (\neg 21 \lor \neg 31) \land (\neg 21 \lor \neg 41) \land (\neg 31 \lor \neg 41)]
 \newline
@@ -90,8 +92,10 @@ One \; queen \; per \; column:
 \newline
 \land [(\neg 14 \lor \neg 24) \land (\neg 14 \lor \neg 34) \land (\neg 14 \lor \neg 44) \land (\neg 24 \lor \neg 34) \land (\neg 24 \lor \neg 44) \land (\neg 34 \lor \neg 44)]
 \newline
+$$
 
-One \; queen \; per \; diagonal:
+$$
+% One \; queen \; per \; diagonal:
 \newline
 \land [(\neg 13 \lor \neg 24)]
 \newline
