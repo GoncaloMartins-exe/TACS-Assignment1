@@ -1,27 +1,54 @@
-## Problems
-1. **N-queens completation**: **N**x**N** board that must start with some queens already positioned and completed with the rest.
-   - At max one queen per row, column and diagonal.
+# Part I — N-Queens
+
+## Problem DSL
+
+### N-Queens completion
+
+The selected problem is **N-Queens completion**. Given an \(N \times N\) chessboard with some queens already positioned, the goal is to place the remaining queens so that no two queens attack each other.
+
+The constraints are:
+
+- At most one queen per row.
+- At most one queen per column.
+- At most one queen per diagonal.
+
+The problem model describes the board, the constraints, and any pre-filled queen positions. It does not itself describe the completed solution.
+
+### Problem DSL metamodel
+
+The Problem DSL metamodel is defined in BESSER. It contains the concepts `Problem`, `Board`, `Queen`, `FixedPosition`, and `Constraint`, as well as the `ConstraintType` enumeration.
+
+![N-Queens Problem DSL metamodel](../assets/N_Queens_Diagram.png)
+
+The metamodel defines a `Problem` with a `Board` and a set of `Constraint` objects. The board can contain `Queen` objects and `FixedPosition` objects. The constraint types currently model the row, column, and diagonal rules.
+
+### Example problem model
+
+The following BESSER Object Diagram illustrates a small N-Queens problem instance. The board size is 4, and the problem is associated with the four constraint types.
+
+![N-Queens example Object Diagram](../assets/N_Queens_Object%20Diagram.png)
+
+The example is a **problem model**, not a solution model: it specifies the instance and its constraints. Pre-filled positions are represented using the `FixedPosition` concept when included in a particular instance.
 
 ## Codification
-#### Limit of **12 qubits**
 
-The 12-qubit limit constrains the number of variables encoded in the quantum circuit.
+### Limit of 12 qubits
 
-### **N-Queens**
+The quantum circuit implementation is subject to a limit of **12 qubits**. The encoding therefore affects the size of the instances that can be considered.
 
-For a *4x4* board:
+For a \(4 \times 4\) board:
 
-- 4 rows = 4 variables
-- Each variable requires `log2(4) = 2` qubits
-- Total: `4 x 2 = 8` qubits
+- 4 rows correspond to 4 variables.
+- Each variable requires \(\log_2(4)=2\) qubits to encode the column of the queen in that row.
+- Total: \(4 \times 2 = 8\) qubits.
 
-Therefore, a *4x4 N-Queens* instance fits within the 12-qubit limit.
+Therefore, a \(4 \times 4\) N-Queens instance fits within the 12-qubit limit. Under this encoding, a row variable represents the column selected for the queen in that row. Pre-filled positions restrict the corresponding variable to the specified column.
 
-#### (**2 queens pre-filled** leaving **2 queens to be placed** -> `8 qubits`).
-
-## Tests
+## Test instance
 
 ### Queens
+
+The following board is used as a small example for the N-Queens completion problem:
 
 | . | Q | . | . |
 |---|---|---|---|
