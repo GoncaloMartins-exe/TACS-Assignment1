@@ -8,6 +8,7 @@ The selected problem is **N-Queens completion**. Given an \(N \times N\) chessbo
 
 The constraints are:
 
+- At least one queen per row.
 - At most one queen per row.
 - At most one queen per column.
 - At most one queen per diagonal.
