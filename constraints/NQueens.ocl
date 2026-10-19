@@ -1,0 +1,74 @@
+
+-- The board must have a positive size.
+context Board
+inv ValidSize:
+    self.size > 0
+
+
+-- Every queen must be inside the board
+context Problem
+inv QueensWithinBoard:
+    self.board.queen->forAll(q |
+        q.row >= 1 and
+        q.row <= self.board.size and
+        q.column >= 1 and
+        q.column <= self.board.size
+    )
+
+
+-- Every fixed position must be inside the board
+context Problem
+inv FixedPositionsWithinBoard:
+    self.board.fixedposition->forAll(p |
+        p.row >= 1 and
+        p.row <= self.board.size and
+        p.column >= 1 and
+        p.column <= self.board.size
+    )
+
+
+-- Every fixed position must correspond to a queen placed at the same coordinates
+context Problem
+inv FixedPositionsCorrespondToQueens:
+    self.board.fixedposition->forAll(p |
+        self.board.queen->exists(q |
+            q.row = p.row and
+            q.column = p.column
+        )
+    )
+
+
+-- No two distinct queens may share a row, column, or diagonal
+context Problem
+inv NoConflictingQueens:
+    self.board.queen->forAll(q1 |
+        self.board.queen->forAll(q2 |
+            q1 <> q2 implies
+                (
+                    q1.row <> q2.row and
+                    q1.column <> q2.column and
+                    (q1.row - q2.row) <>
+                        (q1.column - q2.column) and
+                    (q1.row - q2.row) <>
+                        (q2.column - q1.column)
+                )
+        )
+    )
+
+
+-- Fixed positions must not conflict with each other
+context Problem
+inv NoConflictingFixedPositions:
+    self.board.fixedposition->forAll(p1 |
+        self.board.fixedposition->forAll(p2 |
+            p1 <> p2 implies
+                (
+                    p1.row <> p2.row and
+                    p1.column <> p2.column and
+                    (p1.row - p2.row) <>
+                        (p1.column - p2.column) and
+                    (p1.row - p2.row) <>
+                        (p2.column - p1.column)
+                )
+        )
+    )
