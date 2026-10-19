@@ -106,14 +106,15 @@ The metamodel is a basic CNF with literals specialized for the N-Queens problem:
 The CNF for an empty board gets very verbose. For an empty 4x4 board, it can be written as follows:
 
 At least one queen per row:
+
 $$
-% One \; queen \; per \; row:
 \newline
 (11 \lor 12 \lor 13 \lor 14) \land (21 \lor 22 \lor 23 \lor 24) \land (31 \lor 32 \lor 33 \lor 34) \land (41 \lor 42 \lor 43 \lor 44)
 \newline
 $$
 
 At most one queen per row:
+
 $$
 \newline
 \land [(\neg 11 \lor \neg 12) \land (\neg 11 \lor \neg 13) \land (\neg 11 \lor \neg 14) \land (\neg 12 \lor \neg 13) \land (\neg 12 \lor \neg 14) \land (\neg 13 \lor \neg 14)]
@@ -127,8 +128,8 @@ $$
 $$
 
 At most one queen per column:
+
 $$
-% One \; queen \; per \; column:
 \newline
 \land [(\neg 11 \lor \neg 21) \land (\neg 11 \lor \neg 31) \land (\neg 11 \lor \neg 41) \land (\neg 21 \lor \neg 31) \land (\neg 21 \lor \neg 41) \land (\neg 31 \lor \neg 41)]
 \newline
@@ -141,8 +142,8 @@ $$
 $$
 
 At most one queen per diagonal:
+
 $$
-% One \; queen \; per \; diagonal:
 \newline
 \land [(\neg 13 \lor \neg 24)]
 \newline
@@ -154,6 +155,7 @@ $$
 \newline
 \land [(\neg 31 \lor \neg 42)]
 $$
+
 ---
 
 Fortunately, the CNF can be reduced drastically when given initial queen positions. On a 4x4 board with queens at (1,2) and (3,1), the CNF can get reduced to:
@@ -162,7 +164,7 @@ $$
 (24) \land (43 \lor 44) \land (\neg 43 \lor \neg 44) \land (\neg 24 \lor \neg 44)
 $$
 
-![](../assets/cnf_object_model.png)
+![Example CNF object diagram](../assets/cnf_object_model.png)
 
 ### OCL Constraints
 
