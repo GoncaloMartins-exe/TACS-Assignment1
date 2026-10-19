@@ -23,6 +23,17 @@ The Problem DSL metamodel is defined in BESSER. It contains the concepts `Proble
 
 The metamodel defines a `Problem` with a `Board` and a set of `Constraint` objects. The board can contain `Queen` objects and `FixedPosition` objects. The constraint types currently model the row, column, and diagonal rules.
 
+| Concept | Attributes | Description |
+|---|---|---|
+| `Problem` | `name: str` | Identifies the N-Queens problem instance. |
+| `Board` | `size: int` | Defines the dimensions of the square chessboard. |
+| `Queen` | `row: int`, `column: int` | Represents a queen positioned on the board. |
+| `FixedPosition` | `row: int`, `column: int` | Represents a queen position that must be preserved when completing the board. |
+| `Constraint` | `type: ConstraintType` | Represents a rule that the solution must satisfy. |
+| `ConstraintType` | Enumeration | Defines `AT_LEAST_ONE_PER_ROW`, `AT_MOST_ONE_PER_ROW`, `AT_MOST_ONE_PER_COLUMN`, and `AT_MOST_ONE_PER_DIAGONAL`. |
+
+The main associations are `Problem–Board`, `Problem–Constraint`, `Board–Queen`, and `Board–FixedPosition`. The `Board` contains its queens and fixed positions, while the `Problem` defines the constraints that apply to the instance.
+
 ### Example problem model
 
 The following BESSER Object Diagram illustrates a small N-Queens problem instance. The board size is 4, and the problem is associated with the four constraint types.
