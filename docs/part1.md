@@ -32,7 +32,13 @@ The metamodel defines a `Problem` with a `Board` and a set of `Constraint` objec
 | `Constraint` | `type: ConstraintType` | Represents a rule that the solution must satisfy. |
 | `ConstraintType` | Enumeration | Defines `AT_LEAST_ONE_PER_ROW`, `AT_MOST_ONE_PER_ROW`, `AT_MOST_ONE_PER_COLUMN`, and `AT_MOST_ONE_PER_DIAGONAL`. |
 
-The main associations are `Problem–Board`, `Problem–Constraint`, `Board–Queen`, and `Board–FixedPosition`. The `Board` contains its queens and fixed positions, while the `Problem` defines the constraints that apply to the instance.
+The main associations are `Problem–Board`, `Problem–Constraint`,
+`Board–Queen`, and `Board–FixedPosition`. Each problem has one board
+and a set of constraints. A board can contain zero or more queens and
+zero or more fixed positions. The `Board–Queen` and
+`Board–FixedPosition` associations are compositions, as these objects
+belong to their board. The exact multiplicities are defined in the
+BESSER metamodel.
 
 ### Example problem model
 
