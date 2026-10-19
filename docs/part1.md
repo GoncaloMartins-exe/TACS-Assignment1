@@ -53,6 +53,23 @@ must remain unchanged when the remaining queens are placed. The
 Object Diagram must therefore include one `FixedPosition` object for
 each pre-filled queen in the test instance.
 
+### OCL constraints
+
+OCL (Object Constraint Language) is used to specify additional invariants that instances of the Problem DSL metamodel must satisfy. The constraints are defined in `constraints/NQueens.ocl`.
+
+The following invariants are specified:
+
+- **ValidSize:** the board size must be greater than zero.
+- **QueensWithinBoard:** every queen must have row and column coordinates within the board boundaries.
+- **FixedPositionsWithinBoard:** every fixed position must lie within the board boundaries.
+- **FixedPositionsCorrespondToQueens:** every fixed position must correspond to a queen placed at the same coordinates.
+- **NoConflictingQueens:** no two distinct queens may share a row, column, or diagonal.
+- **NoConflictingFixedPositions:** no two fixed positions may conflict by sharing a row, column, or diagonal.
+
+These invariants ensure that the model represents a valid partial N-Queens configuration. The board is not required to be complete at this stage, since the purpose of the problem DSL is to represent the initial state of the completion problem.
+
+The OCL constraints complement the structural restrictions of the metamodel by expressing semantic properties of the problem. Their syntax and compatibility with the selected OCL implementation must be validated before execution.
+
 ## Codification
 
 ### Limit of 12 qubits
@@ -75,9 +92,9 @@ The following board is used as a small example for the N-Queens completion probl
 
 | . | Q | . | . |
 |---|---|---|---|
-| . | . | . | `Q` |
+| . | . | . | . |
 | Q | . | . | . |
-| . | . | `Q` | . |
+| . | . | . | . |
 
 ## Solution DSL
 
