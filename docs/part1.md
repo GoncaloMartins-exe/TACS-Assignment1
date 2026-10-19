@@ -158,7 +158,15 @@ $$
 
 ---
 
-Fortunately, the CNF can be reduced drastically when given initial queen positions. On a 4x4 board with queens at (1,2) and (3,1), the CNF can get reduced to:
+Fortunately, the CNF can be reduced drastically when given initial queen positions. On a 4x4 board with queens at (1,2) and (3,1), there are only 3 possible positions for the remaining 2 queens:
+
+| . | Q | . | . |
+|---|---|---|---|
+| . | . | . | ? |
+| Q | . | . | . |
+| . | . | ? | ? |
+
+This can be translated to the following CNF:
 
 $$
 (24) \land (43 \lor 44) \land (\neg 43 \lor \neg 44) \land (\neg 24 \lor \neg 44)
