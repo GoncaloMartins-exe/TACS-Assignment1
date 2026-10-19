@@ -46,7 +46,12 @@ The following BESSER Object Diagram illustrates a small N-Queens problem instanc
 
 ![N-Queens example Object Diagram](../assets/N_Queens_Object%20Diagram.png)
 
-The example is a **problem model**, not a solution model: it specifies the instance and its constraints. Pre-filled positions are represented using the `FixedPosition` concept when included in a particular instance.
+The Object Diagram represents the problem instance and its constraints,
+rather than a completed solution. The pre-filled queens are represented
+by `FixedPosition` objects associated with the board. These positions
+must remain unchanged when the remaining queens are placed. The
+Object Diagram must therefore include one `FixedPosition` object for
+each pre-filled queen in the test instance.
 
 ## Codification
 
