@@ -1,0 +1,15 @@
+
+-- The board must have a positive size.
+context Board
+inv ValidSize:
+    self.size > 0
+
+-- All positions must be within board
+context Board
+inv PositionsWithinBoard:
+    self.conjunction.disjunction.literal->forAll(p |
+        p.row >= 1 and
+        p.row <= self.size and
+        p.column >= 1 and
+        p.column <= self.size
+    )
