@@ -1,3 +1,4 @@
+import math
 from besser.BUML.metamodel.quantum.quantum import (
     QuantumCircuit, QuantumRegister, ClassicalRegister,
     HadamardGate, PauliXGate, PauliYGate, PauliZGate,
@@ -14,7 +15,7 @@ from besser.BUML.metamodel.object import ObjectModel, Object
 def dont_print(*values, end = None):
     return
 
-def t2(cnf: ObjectModel, debug: bool = True, group_size: int = None) -> QuantumCircuit:
+def t2(cnf: ObjectModel, debug: bool = True, group_size: int = None, iterations: int = None) -> QuantumCircuit:
     debug = print if debug else dont_print
 
     # Map positions to qubits
@@ -39,6 +40,15 @@ def t2(cnf: ObjectModel, debug: bool = True, group_size: int = None) -> QuantumC
     circuit.add_creg(ClassicalRegister(name="c", size=len(variables)))
 
     debug(f"Need {len(variables) + group_size + len(groups)} qubits (data: {len(variables)}, ancillas: {group_size + len(groups)})")
+
+    if iterations is None:
+        lits = lambda d: d.literal if hasattr(d.literal, "__len__") else [d.literal]
+        solutions = sum(
+            all(any(((x >> variables[(l.row, l.column)]) & 1) == bool(l.queen) for l in lits(d)) for d in disjunctions)
+            for x in range(2 ** len(variables))
+        )
+        iterations = math.floor(math.pi / 4 * math.sqrt(2 ** len(variables) / solutions)) if solutions else 0
+    debug(f"Grover iterations: {iterations}")
 
     # Superposition
     for i in range(len(variables)):
@@ -71,35 +81,36 @@ def t2(cnf: ObjectModel, debug: bool = True, group_size: int = None) -> QuantumC
             for (i, disj) in enumerate(group):
                 clause(disj, len(variables) + i)
 
-    # Compute clauses
-    compute_groups()
+    for _ in range(iterations):
+        # Compute clauses
+        compute_groups()
 
-    # X-Gates + Phase Flip
-    zgate = PauliZGate(target_qubit=len(variables) + group_size)
-    for g in range(1, len(groups)):
-        zgate.control_qubits.append(g + len(variables) + group_size)
-        zgate.control_states.append(ControlState.CONTROL)
-    circuit.add_operation(zgate)
+        # X-Gates + Phase Flip
+        zgate = PauliZGate(target_qubit=len(variables) + group_size)
+        for g in range(1, len(groups)):
+            zgate.control_qubits.append(g + len(variables) + group_size)
+            zgate.control_states.append(ControlState.CONTROL)
+        circuit.add_operation(zgate)
 
-    # Uncompute ancillas
-    compute_groups()
+        # Uncompute ancillas
+        compute_groups()
 
-    # Diffuser
-    for i in range(len(variables)):
-        circuit.add_operation(HadamardGate(target_qubit=i))
-    for i in range(len(variables)):
-        circuit.add_operation(PauliXGate(target_qubit=i))
+        # Diffuser
+        for i in range(len(variables)):
+            circuit.add_operation(HadamardGate(target_qubit=i))
+        for i in range(len(variables)):
+            circuit.add_operation(PauliXGate(target_qubit=i))
 
-    zgate = PauliZGate(target_qubit=0)
-    for i in range(1, len(variables)):
-        zgate.control_qubits.append(i)
-        zgate.control_states.append(ControlState.CONTROL)
-    circuit.add_operation(zgate)
+        zgate = PauliZGate(target_qubit=0)
+        for i in range(1, len(variables)):
+            zgate.control_qubits.append(i)
+            zgate.control_states.append(ControlState.CONTROL)
+        circuit.add_operation(zgate)
 
-    for i in range(len(variables)):
-        circuit.add_operation(PauliXGate(target_qubit=i))
-    for i in range(len(variables)):
-        circuit.add_operation(HadamardGate(target_qubit=i))
+        for i in range(len(variables)):
+            circuit.add_operation(PauliXGate(target_qubit=i))
+        for i in range(len(variables)):
+            circuit.add_operation(HadamardGate(target_qubit=i))
 
     # Measure
     for i in range(len(variables)):
