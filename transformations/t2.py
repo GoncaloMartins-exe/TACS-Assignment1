@@ -30,7 +30,10 @@ def t2(cnf: ObjectModel, debug: bool = True) -> QuantumCircuit:
     for obj in cnf.objects:
         if obj.classifier.name == "Disjunction":
             disjunctions.append(obj)
-    circuit = QuantumCircuit(name="QuantumCircuit", qubits=len(variables) + len(disjunctions))
+    # circuit = QuantumCircuit(name="QuantumCircuit", qubits=len(variables) + len(disjunctions))
+    circuit = QuantumCircuit(name="QuantumCircuit")
+    circuit.add_qreg(QuantumRegister(name="q", size=len(variables) + len(disjunctions)))
+    circuit.add_creg(ClassicalRegister(name="c", size=len(variables)))
 
     debug(f"Need {len(variables) + len(disjunctions)} qubits (data: {len(variables)}, ancillas: {len(disjunctions)})")
 
@@ -61,7 +64,7 @@ def t2(cnf: ObjectModel, debug: bool = True) -> QuantumCircuit:
 
     zgate = PauliZGate(target_qubit=len(variables))
     for i in range(1, len(disjunctions)):
-        zgate.control_qubits.append(i + len(disjunctions))
+        zgate.control_qubits.append(i + len(variables))
         zgate.control_states.append(ControlState.CONTROL)
     circuit.add_operation(zgate)
 
