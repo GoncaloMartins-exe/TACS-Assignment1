@@ -1,5 +1,7 @@
 import json, sys
 from metamodels.Metamodel_NQueens import Board, Problem, Constraint, ConstraintType, FixedPosition, Queen
+from besser.BUML.metamodel.object import ObjectModel
+from besser.generators.json import JSONObjectGenerator
 
 if len(sys.argv) > 1:
     with open(sys.argv[1], "r") as f:
@@ -7,7 +9,7 @@ if len(sys.argv) > 1:
 else:
     data = sys.stdin.read()
 
-def json_to_dsl(data) -> Problem:
+def json_to_dsl(data):
     data = json.loads(data)
 
     problem = Problem("Queens").attributes(name = "NQueens_Problem").build()
@@ -26,6 +28,12 @@ def json_to_dsl(data) -> Problem:
     board.queen = queens
     board.fixedposition = fixedpos
 
-    return problem
+    return set([board, problem]).union(queens).union(fixedpos)
 
-print(json_to_dsl(data))
+objects = json_to_dsl(data)
+problem = ObjectModel(
+    name = "ProblemDSL",
+    objects = objects,
+)
+
+JSONObjectGenerator(model=problem, output_dir="output/").generate()
