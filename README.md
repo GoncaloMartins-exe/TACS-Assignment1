@@ -27,3 +27,11 @@ source .venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
+# Run
+
+Select one of the files in the `input/` directory (or create your own) and run:
+```bash
+python pipeline.py <file-path>
+```
+
