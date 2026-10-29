@@ -1,5 +1,6 @@
 from transformations.json_to_dsl import json_to_dsl
 from transformations.t1 import t1
+from transformations.t2 import t2
 import sys
 from besser.generators.json import JSONObjectGenerator
 
@@ -13,6 +14,7 @@ else:
 
 problem = json_to_dsl(data)
 cnf = t1(problem)
+qiskit_model = t2(cnf)
 # TODO
 
 # JSONObjectGenerator(
