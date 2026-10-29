@@ -3,17 +3,12 @@ from metamodels.Metamodel_NQueens import Board, Problem, Constraint, ConstraintT
 from besser.BUML.metamodel.object import ObjectModel
 from besser.generators.json import JSONObjectGenerator
 
-if len(sys.argv) > 1:
-    with open(sys.argv[1], "r") as f:
-        data = f.read()
-else:
-    data = sys.stdin.read()
-
-def json_to_dsl(data):
+def json_to_dsl(data: str) -> ObjectModel:
     data = json.loads(data)
 
     problem = Problem("Queens").attributes(name = "NQueens_Problem").build()
-    board = Board("Board").attributes(size = data["board_size"]).build()
+    size = data["board_size"]
+    board = Board(f"Board_{size}x{size}").attributes(size = size).build()
     problem.board = board
     board.problem = problem
     queens = set()
@@ -28,12 +23,21 @@ def json_to_dsl(data):
     board.queen = queens
     board.fixedposition = fixedpos
 
-    return set([board, problem]).union(queens).union(fixedpos)
+    model = ObjectModel(
+        name = "ProblemDSL",
+        objects = set([board, problem]).union(queens).union(fixedpos),
+    )
 
-objects = json_to_dsl(data)
-problem = ObjectModel(
-    name = "ProblemDSL",
-    objects = objects,
-)
+    return model
 
-JSONObjectGenerator(model=problem, output_dir="output/").generate()
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], "r") as f:
+            data = f.read()
+    else:
+        data = sys.stdin.read()
+
+    JSONObjectGenerator(
+        model=json_to_dsl(data),
+        output_dir="output/",
+    ).generate()
