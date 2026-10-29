@@ -32,7 +32,7 @@ def t1(problem: ObjectModel, debug: bool = False) -> ObjectModel:
         disjunctions.add(d)
         return d
 
-    all_literals = set()
+    all_literals = set() # to keep track of number of literals and to build ObjectModel
     def new_literal(literals: list[Literal], row: int, col: int, queen: bool, all_literals: set[Literal]) -> Literal:
         l = Literal(f"literal_{len(all_literals)+1}").attributes(row=row, column=col, queen=queen).build()
         literals.append(l)
@@ -96,6 +96,7 @@ def t1(problem: ObjectModel, debug: bool = False) -> ObjectModel:
         all_pairs([p for p in lower_triangle if p in valid_positions], disjunctions, all_literals)
         debug()
 
+    conjunction.disjunction = disjunctions
     return ObjectModel(
         name="CNF",
         objects={board, conjunction}.union(disjunctions).union(all_literals),
