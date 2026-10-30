@@ -76,11 +76,11 @@ counts: dict[str, int] = runpy.run_path("output/qiskit_circuit.py")["counts"]
 if debug_qiskit:
     print("Counts:", counts)
 
-# arbitrary heuristic
+# heuristic - prune any count that's clearly lesser than max
 most_frequent = max(counts.values())
-solution_bitstrings = {s for (s, count) in counts.items() if count > most_frequent * 0.2}
+solution_bitstrings = {s for (s, count) in counts.items() if count > most_frequent * 0.1}
 
-solutions: list[set[tuple[int, int]]] = []
+solutions: list[list[tuple[int, int]]] = []
 for bitstring in solution_bitstrings:
     solution = list(fixed_queens)
     for (bit, pos) in zip(reversed(bitstring), qubit_mapping):
@@ -88,7 +88,18 @@ for bitstring in solution_bitstrings:
             solution.append(pos)
     solutions.append(solution)
 
-if len(solutions) != len(counts):
+# Check if first solution is correct:
+# If yes, probably all solutions are correct
+# If no, there is probably no solution
+def is_valid_solution(sol: list[tuple[int, int]]):
+    if len(sol) <= 1:
+        return True
+    p1 = sol[0]
+    if any(p2 for p2 in sol[1:] if p1[0] == p2[0] or p1[1] == p2[1] or abs(p1[0]-p2[0]) == abs(p1[1]-p2[1])):
+        return False
+    return is_valid_solution(sol[1:])
+
+if is_valid_solution(solutions[0]):
     solutions = [sorted(sol, key=lambda x: x[0]) for sol in solutions]
     print("\033[0;32mSolutions:")
     for sol in solutions:
