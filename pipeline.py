@@ -1,15 +1,18 @@
 
 import sys
-if len(sys.argv) > 1:
-    with open(sys.argv[1], "r") as f:
-        data = f.read()
-else:
+
+filename = list(filter(lambda x: '--' not in x, sys.argv[1:]))
+if len(filename) != 1:
     print(f"Usage: {sys.argv[0]} <file-path> [...flags]")
     print("  |- <file-path>: Path to the simplified problem (JSON)")
     print("  |- --debug-t1, --debug-t2, --debug-qiskit, --debug-all: Print debug information")
     print("  |- --t1: Stop after T1, save results in output/CNF.json")
     exit(1)
     # data = sys.stdin.read()
+else:
+    filename = filename[0]
+    with open(filename, "r") as f:
+        data = f.read()
 
 if any(x == "--debug-all" for x in sys.argv):
     debug_t1 = debug_t2 = debug_qiskit = True
