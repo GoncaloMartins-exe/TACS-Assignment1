@@ -21,7 +21,7 @@ def t1(problem: ObjectModel, debug: bool = False) -> ObjectModel:
     queens = [obj for obj in problem.objects if obj.classifier.name == "Queen"]
     valid_positions = [(row, col) for row in range(1, size+1) for col in range(1, size+1) if pos_is_valid(row, col, queens)]
 
-    debug(f"Valid positions: {valid_positions}")
+    debug(f"Possible positions: {valid_positions}")
 
     board = Board(f"board_{size}x{size}").attributes(size=size).build()
     conjunction = Conjunction("conj_1").build()
@@ -54,6 +54,7 @@ def t1(problem: ObjectModel, debug: bool = False) -> ObjectModel:
         return disjunctions
 
     # Exactly one queen per row
+    debug("Exactly one per row:")
     for i in range(1, size+1):
         row_positions = [(row, col) for (row, col) in valid_positions if row == i]
         if len(row_positions) == 0:
@@ -62,17 +63,23 @@ def t1(problem: ObjectModel, debug: bool = False) -> ObjectModel:
         # At least one per row
         at_least_one_per_row = new_disj(disjunctions)
         literals = []
+        debug("AND (", end="")
+        first_iter = True
         for (row, col) in row_positions:
             l = new_literal(literals, row, col, True, all_literals)
+            debug(f"{"" if first_iter else " OR "}{row, col}", end="")
+            first_iter = False
+        debug(")")
         at_least_one_per_row.literal = set(literals)
 
         # At most one per row
         all_pairs(row_positions, disjunctions, all_literals)
         debug()
 
-    debug("\n")
+    debug()
 
     # At most one per column
+    debug("At most one per column:")
     for i in range(1, size+1):
         col_positions = [(row, col) for (row, col) in valid_positions if col == i]
         if len(col_positions) == 0:
@@ -80,20 +87,36 @@ def t1(problem: ObjectModel, debug: bool = False) -> ObjectModel:
         all_pairs(col_positions, disjunctions, all_literals)
         debug()
 
-    debug("\n")
+    debug()
 
     # At most one per diagonal
     for i in range(1, size):
         # Diagonal in the upper triangle (+ main diagonal)
         upper_triangle = [(col-i+1, col) for col in range(i, size+1)]
+        debug(f"Upper Triangle {upper_triangle}:")
         all_pairs([p for p in upper_triangle if p in valid_positions], disjunctions, all_literals)
         debug()
 
-        # Diagonal in the lower triangle
+        # Diagonal in the upper anti-triangle (+ anti-diagonal)
+        upper_anti_triangle = [(size-j+i, j) for j in range(i, size+1)]
+        debug(f"Upper Anti-Triangle {upper_anti_triangle}:")
+        all_pairs([p for p in upper_anti_triangle if p in valid_positions], disjunctions, all_literals)
+        debug()
+
+        # Don't repeat main/anti diagonal
         if i == 1:
             continue
+
+        # Diagonal in the lower triangle
         lower_triangle = [(row, row-i+1) for row in range(i, size+1)]
+        debug(f"Lower Triangle {lower_triangle}:")
         all_pairs([p for p in lower_triangle if p in valid_positions], disjunctions, all_literals)
+        debug()
+
+        # Diagonal in the lower anti-triangle
+        lower_anti_triangle = [(j, size-j+i) for j in range(i, size+1)]
+        debug(f"Lower Anti-Triangle {lower_anti_triangle}:")
+        all_pairs([p for p in lower_anti_triangle if p in valid_positions], disjunctions, all_literals)
         debug()
 
     conjunction.disjunction = disjunctions
