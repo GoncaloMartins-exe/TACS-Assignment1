@@ -170,6 +170,24 @@ $$
 \land [(\neg 31 \lor \neg 42)]
 $$
 
+At most one queen per anti-diagonal:
+
+$$
+\land [(\neg 12 \lor \neg 21)]
+$$
+$$
+\land [(\neg 13 \lor \neg 22) \land (\neg 13 \lor \neg 31) \land (\neg 22 \lor \neg 31)]
+$$
+$$
+\land [(\neg 14 \lor \neg 23) \land (\neg 14 \lor \neg 32) \land (\neg 14 \lor \neg 41) \land (\neg 23 \lor \neg 32) \land (\neg 23 \lor \neg 41) \land (\neg 32 \lor \neg 41)]
+$$
+$$
+\land [(\neg 24 \lor \neg 33) \land (\neg 24 \lor \neg 42) \land (\neg 33 \lor \neg 42)]
+$$
+$$
+\land [(\neg 34 \lor \neg 43)]
+$$
+
 ---
 
 Given the initial queen positions, the CNF shrinks a lot. Each fixed queen rules out every cell it attacks, and those cells drop out of the formula. On a 4x4 board with queens at (1,2) and (3,1), only 3 cells remain for the other 2 queens:
