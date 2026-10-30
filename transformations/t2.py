@@ -15,15 +15,20 @@ from besser.BUML.metamodel.object import ObjectModel, Object
 def dont_print(*values, end = None):
     return
 
-def t2(cnf: ObjectModel, debug: bool = True, group_size: int = None, iterations: int = None) -> QuantumCircuit:
+def t2(cnf: ObjectModel, group_size: int = None, iterations: int = None, debug: bool = True) -> tuple[
+    QuantumCircuit,
+    list[tuple[int, int]]
+]:
     debug = print if debug else dont_print
 
-    # Map positions to qubits
+    # Map positions to qubits and vice-versa
     variables = {}
+    data_qubits = []
     for obj in cnf.objects:
         if obj.classifier.name == "Literal":
             pos = (obj.row, obj.column)
             if pos not in variables:
+                data_qubits.append(pos)
                 variables[pos] = len(variables)
 
     debug(f"Variables: {variables}")
@@ -116,4 +121,4 @@ def t2(cnf: ObjectModel, debug: bool = True, group_size: int = None, iterations:
     for i in range(len(variables)):
         circuit.add_operation(Measurement(target_qubit=i, output_bit=i, basis='Z'))
 
-    return circuit
+    return (circuit, data_qubits)

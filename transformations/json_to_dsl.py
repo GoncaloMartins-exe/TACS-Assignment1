@@ -3,7 +3,10 @@ from metamodels.Metamodel_NQueens import Board, Problem, Constraint, ConstraintT
 from besser.BUML.metamodel.object import ObjectModel
 from besser.generators.json import JSONObjectGenerator
 
-def json_to_dsl(data: str) -> ObjectModel:
+def json_to_dsl(data: str) -> tuple[
+    ObjectModel,
+    set[tuple[int, int]],
+]:
     data = json.loads(data)
 
     problem = Problem("Queens").attributes(name = "NQueens_Problem").build()
@@ -13,8 +16,10 @@ def json_to_dsl(data: str) -> ObjectModel:
     board.problem = problem
     queens = set()
     fixedpos = set()
+    fixed_queens = set()
 
     for (i, queen) in enumerate(data["queens"]):
+        fixed_queens.add((queen[0], queen[1]))
         fixed_pos = FixedPosition(f"fixed_position_{i}").attributes(row = queen[0], column = queen[1]).build()
         queen = Queen(f"queen_{i}").attributes(row = queen[0], column = queen[1]).build()
         queens.add(queen)
@@ -28,7 +33,7 @@ def json_to_dsl(data: str) -> ObjectModel:
         objects = set([board, problem]).union(queens).union(fixedpos),
     )
 
-    return model
+    return (model, fixed_queens)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
