@@ -6,6 +6,7 @@ from besser.generators.json import JSONObjectGenerator
 def json_to_dsl(data: str) -> tuple[
     ObjectModel,
     set[tuple[int, int]],
+    int,
 ]:
     data = json.loads(data)
 
@@ -33,7 +34,7 @@ def json_to_dsl(data: str) -> tuple[
         objects = set([board, problem]).union(queens).union(fixedpos),
     )
 
-    return (model, fixed_queens)
+    return (model, fixed_queens, size)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:

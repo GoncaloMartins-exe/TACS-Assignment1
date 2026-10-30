@@ -24,7 +24,7 @@ else:
 # Load problem from simplified JSON
 from transformations.json_to_dsl import json_to_dsl
 print("\033[0;33mJSON -> Problem...\033[0m")
-(problem, fixed_queens) = json_to_dsl(data)
+(problem, fixed_queens, board_size) = json_to_dsl(data)
 
 
 # Transform problem into CNF
@@ -73,9 +73,6 @@ if not debug_qiskit:
 print("\033[0;33mRunning output/qiskit_circuit.py...\033[0m\n  Building circuit...\n  ", end="")
 counts: dict[str, int] = runpy.run_path("output/qiskit_circuit.py")["counts"]
 
-if debug_qiskit:
-    print("Counts:", counts)
-
 # heuristic - prune any count that's clearly lesser than max
 most_frequent = max(counts.values())
 solution_bitstrings = {s for (s, count) in counts.items() if count > most_frequent * 0.1}
@@ -86,7 +83,10 @@ for bitstring in solution_bitstrings:
     for (bit, pos) in zip(reversed(bitstring), qubit_mapping):
         if bit == '1':
             solution.append(pos)
-    solutions.append(solution)
+
+    # ignore non-sensical solutions
+    if len(solution) == board_size:
+        solutions.append(solution)
 
 # Check if first solution is correct:
 # If yes, probably all solutions are correct
