@@ -13,8 +13,7 @@ if len(filename) != 1:
     print("  |- <file-path>: Path to the simplified problem (JSON)")
     print("  |- --debug-t1, --debug-t2, --debug-qiskit, --debug-all: Print debug information")
     print("  |- --t1: Stop after T1, save results in output/CNF.json")
-    exit(1)
-    # data = sys.stdin.read()
+    sys.exit(1)
 else:
     filename = filename[0]
     with open(filename, "r") as f:
@@ -41,39 +40,22 @@ if any(x == "--t1" for x in sys.argv):
         model=cnf,
         output_dir="output/",
     ).generate()
-    exit(0)
-
+    sys.exit(0)
 
 # Transform CNF into quantum model
 print("\033[0;33mT2: CNF -> Quantum Circuit...\033[0m")
 (quantum_model, qubit_mapping) = t2(cnf, debug=debug_t2)
 
-
-# Translate quantum model
+# Translate quantum model to Qiskit
 print("\033[0;33mT3: Quantum Circuit -> Qiskit...\033[0m")
 QiskitGenerator(quantum_model, output_dir="output", shots=1024).generate()
 
-# Remove prints from qiskit script
-if not debug_qiskit:
-    path = Path("output/qiskit_circuit.py")
-    lines = path.read_text().splitlines()
-
-    lines = [
-        line for line in lines
-        if 'print(qc.draw())' not in line
-        and 'print("Counts:", counts)' not in line
-    ]
-
-    path.write_text("\n".join(lines) + "\n")
-
-
-
-# Run qiskit and get solutions
+# Qiskit script run directly
 print("\033[0;33mRunning output/qiskit_circuit.py...\033[0m\n  Building circuit...\n  ", end="")
 counts: dict[str, int] = runpy.run_path("output/qiskit_circuit.py")["counts"]
 
-# heuristic - prune any count that's clearly lesser than max
-most_frequent = max(counts.values())
+# Prune counts lesser than 10% of max frequency
+most_frequent = max(counts.values()) if counts else 0
 solution_bitstrings = {s for (s, count) in counts.items() if count > most_frequent * 0.1}
 
 solutions: list[list[tuple[int, int]]] = []
@@ -87,10 +69,7 @@ for bitstring in solution_bitstrings:
     if len(solution) == board_size:
         solutions.append(solution)
 
-# Check if first solution is correct:
-# If yes, probably all solutions are correct
-# If no, there is probably no solution
-def is_valid_solution(sol: list[tuple[int, int]]):
+def is_valid_solution(sol: list[tuple[int, int]]) -> bool:
     if len(sol) <= 1:
         return True
     p1 = sol[0]
@@ -98,11 +77,12 @@ def is_valid_solution(sol: list[tuple[int, int]]):
         return False
     return is_valid_solution(sol[1:])
 
-if is_valid_solution(solutions[0]):
+# Safe verification (handles empty solution set)
+if solutions and is_valid_solution(solutions[0]):
     solutions = [sorted(sol, key=lambda x: x[0]) for sol in solutions]
     print("\033[0;32mSolutions:")
     for sol in solutions:
         print(f"  - {sol}")
 else:
-    print("\033[0;31mThere are no solutions.")
+    print("\033[0;31mThere are no valid solutions.")
 print("\033[0m", end="", flush=True)
