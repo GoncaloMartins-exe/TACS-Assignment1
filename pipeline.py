@@ -7,6 +7,22 @@ from transformations.t2 import t2
 from besser.generators.json import JSONObjectGenerator
 from besser.generators.qiskit import QiskitGenerator
 
+def print_board(solution: list[tuple[int, int]], board_size: int, fixed_queens: list[tuple[int, int]] | set[tuple[int, int]] = ()):
+    """Visually renders the board in the terminal."""
+    grid = [["." for _ in range(board_size)] for _ in range(board_size)]
+    fixed_set = set(fixed_queens)
+    for r, c in solution:
+        if (r, c) in fixed_set:
+            grid[c - 1][r - 1] = "\033[0;32mQ\033[0m"  # Fixed Queen (green)
+        else:
+            grid[c - 1][r - 1] = "Q"                  # Calculated Queen
+    
+    border = "+" + "---+" * board_size
+    print(border)
+    for row in grid:
+        print("| " + " | ".join(row) + " |")
+        print(border)
+
 filename = list(filter(lambda x: '--' not in x, sys.argv[1:]))
 if len(filename) != 1:
     print(f"Usage: {sys.argv[0]} <file-path> [...flags]")
@@ -51,7 +67,7 @@ print("\033[0;33mT3: Quantum Circuit -> Qiskit...\033[0m")
 QiskitGenerator(quantum_model, output_dir="output", shots=1024).generate()
 
 # Qiskit script run directly
-print("\033[0;33mRunning output/qiskit_circuit.py...\033[0m\n  Building circuit...\n  ", end="")
+print("\033[0;33mRunning output/qiskit_circuit.py...\033[0m")
 counts: dict[str, int] = runpy.run_path("output/qiskit_circuit.py")["counts"]
 
 # Prune counts lesser than 10% of max frequency
@@ -77,12 +93,13 @@ def is_valid_solution(sol: list[tuple[int, int]]) -> bool:
         return False
     return is_valid_solution(sol[1:])
 
-# Safe verification (handles empty solution set)
+print("\n" + "="*40)
 if solutions and is_valid_solution(solutions[0]):
     solutions = [sorted(sol, key=lambda x: x[0]) for sol in solutions]
-    print("\033[0;32mSolutions:")
-    for sol in solutions:
-        print(f"  - {sol}")
+    print(f"\033[0;32mFound {len(solutions)} valid solution(s):\033[0m")
+    for i, sol in enumerate(solutions, 1):
+        print(f"\nSolução #{i}: {sol}")
+        print_board(sol, board_size, fixed_queens)
 else:
-    print("\033[0;31mThere are no valid solutions.")
-print("\033[0m", end="", flush=True)
+    print("\033[0;31mNo valid solutions found.")
+print("="*40 + "\033[0m", flush=True)

@@ -63,3 +63,9 @@ Every entry records: tool and model, goal, what we accepted, and what was wrong 
 | Goal | Produce the LLM usage log required as a deliverable, from our own recollection of how we used LLMs. We used ai to facilitate the md formating andd creation of nice visual tables |
 | Accepted | The table format (tool and model, goal, accepted, wrong, how detected) and the entries for the sessions we described. |
 | Wrong / changed | (1) Claude did not invent details we had not given it: unknown models and errors were marked as not recorded rather than made up. (2) The first version of the log did not include ChatGPT or Gemini, because we had not yet told Claude about them; they were added afterwards. (3) "geminilm" in our dictated notes was ambiguous between Gemini and NotebookLM. |
+
+
+
+
+Part 2:
+Utilizado para desenhar o tabuleiro no terminal
