@@ -67,7 +67,7 @@ def t1(problem: ObjectModel, debug: bool = False) -> ObjectModel:
         first_iter = True
         for (row, col) in row_positions:
             l = new_literal(literals, row, col, True, all_literals)
-            debug(f"{"" if first_iter else " OR "}{row, col}", end="")
+            debug(f"{'' if first_iter else ' OR '}{row, col}", end="")
             first_iter = False
         debug(")")
         at_least_one_per_row.literal = set(literals)
