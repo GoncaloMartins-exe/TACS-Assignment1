@@ -1,4 +1,3 @@
-import math
 from besser.BUML.metamodel.quantum.quantum import (
     QuantumCircuit, QuantumRegister, ClassicalRegister,
     HadamardGate, PauliXGate, PauliYGate, PauliZGate,
@@ -41,15 +40,10 @@ def t2(cnf: ObjectModel, group_size: int = None, iterations: int = None, debug: 
     debug(f"Need {len(variables) + group_size + len(groups)} qubits (data: {len(variables)}, ancillas: {group_size + len(groups)})")
 
     if iterations is None:
-        lits = lambda d: d.literal if hasattr(d.literal, "__len__") else [d.literal]
-        solutions = sum(
-            all(any(((x >> variables[(l.row, l.column)]) & 1) == bool(l.queen) for l in lits(d)) for d in disjunctions)
-            for x in range(2 ** len(variables))
-        )
-        iterations = math.floor(math.pi / 4 * math.sqrt(2 ** len(variables) / solutions)) if solutions else 0
+        raise ValueError("iterations must come from the solver config")
     debug(f"Grover iterations: {iterations}")
 
-    # Superposition
+    # Superposition: equal amplitude over all 2^n assignments [Grover 1996; Nielsen & Chuang ch. 6]
     for i in range(len(variables)):
         hgate = HadamardGate(target_qubit=i)
         circuit.add_operation(hgate)
@@ -80,21 +74,22 @@ def t2(cnf: ObjectModel, group_size: int = None, iterations: int = None, debug: 
             for (i, disj) in enumerate(group):
                 clause(disj, len(variables) + i)
 
+    # Rounds k = floor(pi/4 * sqrt(N/M)), N = 2^n, M = number of solutions, given by the solver config [Boyer et al. 1998; Nielsen & Chuang ch. 6]
     for _ in range(iterations):
-        # Compute clauses
+        # Compute clauses: oracle step, group result qubit = 1 iff every clause of the group holds [Grover 1996; Nielsen & Chuang ch. 6]
         compute_groups()
 
-        # X-Gates + Phase Flip
+        # Phase Flip: -1 on assignments where all groups hold, i.e. the CNF is satisfied [Grover 1996; Nielsen & Chuang ch. 6]
         zgate = PauliZGate(target_qubit=len(variables) + group_size)
         for g in range(1, len(groups)):
             zgate.control_qubits.append(g + len(variables) + group_size)
             zgate.control_states.append(ControlState.CONTROL)
         circuit.add_operation(zgate)
 
-        # Uncompute ancillas
+        # Uncompute ancillas: back to |0>, so they do not stay entangled with the data qubits [Nielsen & Chuang ch. 6]
         compute_groups()
 
-        # Diffuser
+        # Diffuser: inversion about the mean [Grover 1996; Nielsen & Chuang ch. 6]
         for i in range(len(variables)):
             circuit.add_operation(HadamardGate(target_qubit=i))
         for i in range(len(variables)):
