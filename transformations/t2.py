@@ -1,3 +1,4 @@
+import math
 from besser.BUML.metamodel.quantum.quantum import (
     QuantumCircuit, QuantumRegister, ClassicalRegister,
     HadamardGate, PauliXGate, PauliYGate, PauliZGate,
@@ -14,7 +15,7 @@ from besser.BUML.metamodel.object import ObjectModel, Object
 def dont_print(*values, end = None):
     return
 
-def t2(cnf: ObjectModel, group_size: int = None, iterations: int = None, debug: bool = True) -> tuple[
+def t2(cnf: ObjectModel, group_size: int = None, iterations: int = None, debug: bool = True, solutions: int = None) -> tuple[
     QuantumCircuit,
     list[tuple[int, int]]
 ]:
@@ -39,6 +40,9 @@ def t2(cnf: ObjectModel, group_size: int = None, iterations: int = None, debug: 
 
     debug(f"Need {len(variables) + group_size + len(groups)} qubits (data: {len(variables)}, ancillas: {group_size + len(groups)})")
 
+    if iterations is None and solutions is not None:
+        # k = floor(pi/4 * sqrt(N/M)), N = 2^n, M = solutions given by the classical baseline [Boyer et al. 1998; Nielsen & Chuang ch. 6]
+        iterations = math.floor(math.pi / 4 * math.sqrt(2 ** len(variables) / solutions)) if solutions else 0
     if iterations is None:
         raise ValueError("iterations must come from the solver config")
     debug(f"Grover iterations: {iterations}")
