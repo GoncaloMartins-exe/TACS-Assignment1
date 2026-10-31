@@ -1,4 +1,5 @@
 import sys
+import math
 import runpy
 from pathlib import Path
 from transformations.json_to_dsl import json_to_dsl
@@ -30,6 +31,17 @@ def is_valid_solution(sol: list[tuple[int, int]]) -> bool:
     if any(p2 for p2 in sol[1:] if p1[0] == p2[0] or p1[1] == p2[1] or abs(p1[0]-p2[0]) == abs(p1[1]-p2[1])):
         return False
     return is_valid_solution(sol[1:])
+
+def grover_iterations(cnf) -> int:
+    literals = lambda d: d.literal if hasattr(d.literal, "__len__") else [d.literal]
+    squares = sorted({(o.row, o.column) for o in cnf.objects if o.classifier.name == "Literal"})
+    index = {s: i for i, s in enumerate(squares)}
+    clauses = [o for o in cnf.objects if o.classifier.name == "Disjunction"]
+    solutions = sum(
+        all(any(((x >> index[(l.row, l.column)]) & 1) == bool(l.queen) for l in literals(d)) for d in clauses)
+        for x in range(2 ** len(squares))
+    )
+    return math.floor(math.pi / 4 * math.sqrt(2 ** len(squares) / solutions)) if solutions else 0
 
 def main():
     filename = list(filter(lambda x: '--' not in x, sys.argv[1:]))
@@ -70,7 +82,7 @@ def main():
 
     # Transform CNF into quantum model
     print("\033[0;33mT2: CNF -> Quantum Circuit...\033[0m")
-    (quantum_model, qubit_mapping) = t2(cnf, debug=debug_t2)
+    (quantum_model, qubit_mapping) = t2(cnf, iterations=grover_iterations(cnf), debug=debug_t2)
 
     # Translate quantum model to Qiskit
     print("\033[0;33mT3: Quantum Circuit -> Qiskit...\033[0m")
