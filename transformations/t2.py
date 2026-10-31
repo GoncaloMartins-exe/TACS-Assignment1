@@ -22,14 +22,8 @@ def t2(cnf: ObjectModel, group_size: int = None, iterations: int = None, debug: 
     debug = print if debug else dont_print
 
     # Map positions to qubits and vice-versa
-    variables = {}
-    data_qubits = []
-    for obj in cnf.objects:
-        if obj.classifier.name == "Literal":
-            pos = (obj.row, obj.column)
-            if pos not in variables:
-                data_qubits.append(pos)
-                variables[pos] = len(variables)
+    data_qubits = sorted({(obj.row, obj.column) for obj in cnf.objects if obj.classifier.name == "Literal"})
+    variables = {pos: i for i, pos in enumerate(data_qubits)}
 
     debug(f"Variables: {variables}")
     disjunctions = []
