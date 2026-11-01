@@ -7,6 +7,7 @@ from transformations.t1 import t1
 from transformations.t2 import t2
 from besser.generators.json import JSONObjectGenerator
 from besser.generators.qiskit import QiskitGenerator
+from baseline import solve_nqueens, quantum_metrics, format_metrics
 
 def print_board(solution: list[tuple[int, int]], board_size: int, fixed_queens: list[tuple[int, int]] | set[tuple[int, int]] = ()):
     """Visually renders the board in the terminal."""
@@ -80,9 +81,12 @@ def main():
     if any(x == "--t1" for x in sys.argv):
         sys.exit(0)
 
+    # Classical baseline: number of solutions M, which sets the number of Grover rounds
+    baseline_solutions = solve_nqueens(board_size, fixed_queens)
+
     # Transform CNF into quantum model
     print("\033[0;33mT2: CNF -> Quantum Circuit...\033[0m")
-    (quantum_model, qubit_mapping) = t2(cnf, iterations=grover_iterations(cnf), debug=debug_t2)
+    (quantum_model, qubit_mapping) = t2(cnf, solutions=len(baseline_solutions), debug=debug_t2)
 
     # Translate quantum model to Qiskit
     print("\033[0;33mT3: Quantum Circuit -> Qiskit...\033[0m")
@@ -117,6 +121,9 @@ def main():
     else:
         print("\033[0;31mNo valid solutions found.")
     print("="*40 + "\033[0m", flush=True)
+
+    # Compare the quantum result with the classical baseline
+    print(format_metrics(quantum_metrics(counts, qubit_mapping, fixed_queens, board_size, baseline_solutions)))
 
 if __name__ == "__main__":
     main()
