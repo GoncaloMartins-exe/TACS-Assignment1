@@ -1,0 +1,5 @@
+context SolverConfig inv shots_positive: self.shots > 0
+
+context SolverConfig inv rounds_not_negative: self.rounds >= 0
+
+context SolverConfig inv group_size_not_negative: self.group_size >= 0

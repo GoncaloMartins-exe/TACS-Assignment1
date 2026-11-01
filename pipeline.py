@@ -8,6 +8,7 @@ from transformations.t2 import t2
 from besser.generators.json import JSONObjectGenerator
 from besser.generators.qiskit import QiskitGenerator
 from baseline import solve_nqueens, quantum_metrics, format_metrics
+from solver_config import load_solver_config
 
 def print_board(solution: list[tuple[int, int]], board_size: int, fixed_queens: list[tuple[int, int]] | set[tuple[int, int]] = ()):
     """Visually renders the board in the terminal."""
@@ -51,6 +52,7 @@ def main():
         print("  |- <file-path>: Path to the simplified problem (JSON)")
         print("  |- --debug-t1, --debug-t2, --debug-qiskit, --debug-all: Print debug information")
         print("  |- --t1: Stop after T1, save results in output/CNF.json")
+        print("  |- --config=<file>: Solver settings (JSON: rounds, shots, group_size), default config/solver_config.json")
         sys.exit(1)
     else:
         filename = filename[0]
@@ -63,6 +65,10 @@ def main():
         debug_t1 = any(x == "--debug-t1" for x in sys.argv)
         debug_t2 = any(x == "--debug-t2" for x in sys.argv)
         debug_qiskit = any(x == "--debug-qiskit" for x in sys.argv)
+
+    # Solver settings (rounds, shots, group size), checked against ocl/solver_config.ocl
+    config_flag = [x for x in sys.argv if x.startswith("--config=")]
+    config = load_solver_config(config_flag[0].split("=", 1)[1] if config_flag else "config/solver_config.json")
 
     # Load problem from simplified JSON
     print("\033[0;33mJSON -> Problem...\033[0m")
@@ -86,11 +92,11 @@ def main():
 
     # Transform CNF into quantum model
     print("\033[0;33mT2: CNF -> Quantum Circuit...\033[0m")
-    (quantum_model, qubit_mapping) = t2(cnf, solutions=len(baseline_solutions), debug=debug_t2)
+    (quantum_model, qubit_mapping) = t2(cnf, group_size=config.group_size or None, iterations=config.rounds or None, solutions=len(baseline_solutions), debug=debug_t2)
 
     # Translate quantum model to Qiskit
     print("\033[0;33mT3: Quantum Circuit -> Qiskit...\033[0m")
-    QiskitGenerator(quantum_model, output_dir="output", shots=1024).generate()
+    QiskitGenerator(quantum_model, output_dir="output", shots=config.shots).generate()
 
     # Qiskit script run directly
     print("\033[0;33mRunning output/qiskit_circuit.py...\033[0m")
@@ -123,7 +129,7 @@ def main():
     print("="*40 + "\033[0m", flush=True)
 
     # Compare the quantum result with the classical baseline
-    print(format_metrics(quantum_metrics(counts, qubit_mapping, fixed_queens, board_size, baseline_solutions)))
+    print(format_metrics(quantum_metrics(counts, qubit_mapping, fixed_queens, board_size, baseline_solutions, config.rounds or None)))
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-
 import itertools
 import math
 
@@ -54,8 +53,8 @@ def decode_bitstring(bitstring: str, qubit_mapping, fixed_queens) -> frozenset[t
     return frozenset(fixed_queens) | {pos for bit, pos in zip(reversed(bits), qubit_mapping) if bit == "1"}
 
 
-def quantum_metrics(counts: dict[str, int], qubit_mapping, fixed_queens, board_size: int, baseline_solutions) -> dict:
-    """Compare the measured counts with the classical baseline."""
+def quantum_metrics(counts: dict[str, int], qubit_mapping, fixed_queens, board_size: int, baseline_solutions, rounds: int = None) -> dict:
+    """Compare the measured counts with the classical baseline. rounds: Grover rounds the circuit used (default: the optimal number)."""
     shots = sum(counts.values())
     valid_shots = 0
     found = set()
@@ -66,7 +65,8 @@ def quantum_metrics(counts: dict[str, int], qubit_mapping, fixed_queens, board_s
             found.add(board)
 
     n_qubits, n_solutions = len(qubit_mapping), len(baseline_solutions)
-    rounds = grover_rounds(n_qubits, n_solutions)
+    if rounds is None:
+        rounds = grover_rounds(n_qubits, n_solutions)
     return {
         "search_qubits": n_qubits,
         "assignments": 2 ** n_qubits,
