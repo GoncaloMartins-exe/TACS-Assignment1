@@ -17,7 +17,7 @@ def test_defaults_without_file():
 
 
 def test_repository_config_is_valid():
-    assert load_solver_config("config/solver_config.json").shots > 0
+    assert load_solver_config("config/config.json").shots > 0
 
 
 def test_json_overrides_defaults(tmp_path):

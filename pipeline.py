@@ -52,7 +52,7 @@ def main():
         print("  |- <file-path>: Path to the simplified problem (JSON)")
         print("  |- --debug-t1, --debug-t2, --debug-qiskit, --debug-all: Print debug information")
         print("  |- --t1: Stop after T1, save results in output/CNF.json")
-        print("  |- --config=<file>: Solver settings (JSON: rounds, shots, group_size), default config/solver_config.json")
+        print("  |- --config=<file>: Solver settings (JSON: rounds, shots, group_size), default config/config.json")
         sys.exit(1)
     else:
         filename = filename[0]
@@ -68,7 +68,7 @@ def main():
 
     # Solver settings (rounds, shots, group size), checked against ocl/solver_config.ocl
     config_flag = [x for x in sys.argv if x.startswith("--config=")]
-    config = load_solver_config(config_flag[0].split("=", 1)[1] if config_flag else "config/solver_config.json")
+    config = load_solver_config(config_flag[0].split("=", 1)[1] if config_flag else "config/config.json")
 
     # Load problem from simplified JSON
     print("\033[0;33mJSON -> Problem...\033[0m")
