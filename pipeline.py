@@ -98,19 +98,6 @@ def main():
     print("\033[0;33mT3: Quantum Circuit -> Qiskit...\033[0m")
     QiskitGenerator(quantum_model, output_dir="output", shots=config.shots).generate()
 
-    # Remove prints from qiskit script
-    if not debug_qiskit:
-        path = Path("output/qiskit_circuit.py")
-        lines = path.read_text().splitlines()
-
-        lines = [
-            line for line in lines
-            if 'print(qc.draw())' not in line
-            and 'print("Counts:", counts)' not in line
-        ]
-
-        path.write_text("\n".join(lines) + "\n")
-
     # Qiskit script run directly
     print("\033[0;33mRunning output/qiskit_circuit.py...\033[0m")
     counts: dict[str, int] = runpy.run_path("output/qiskit_circuit.py")["counts"]
@@ -135,7 +122,7 @@ def main():
         solutions = [sorted(sol, key=lambda x: x[0]) for sol in solutions]
         print(f"\033[0;32mFound {len(solutions)} valid solution(s):\033[0m")
         for i, sol in enumerate(solutions, 1):
-            print(f"\\Solution #{i}: {sol}")
+            print(f"\Solution #{i}: {sol}")
             print_board(sol, board_size, fixed_queens)
     else:
         print("\033[0;31mNo valid solutions found.")
