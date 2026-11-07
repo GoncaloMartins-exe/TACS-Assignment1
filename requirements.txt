@@ -1,5 +1,8 @@
 # BESSER
-git+https://github.com/jacomecunha/BESSER.git
+git+https://github.com/BESSER-PEARL/BESSER.git
+
+# B-OCL Interpreter
+bocl
 
 # Quantum
 qiskit
