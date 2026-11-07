@@ -1,11 +1,7 @@
-
--- The board must have a positive size.
 context Board
 inv ValidSize:
     self.size > 0
 
-
--- Every queen must be inside the board
 context Problem
 inv QueensWithinBoard:
     self.board.queen->forAll(q |
@@ -15,8 +11,6 @@ inv QueensWithinBoard:
         q.column <= self.board.size
     )
 
-
--- Every fixed position must be inside the board
 context Problem
 inv FixedPositionsWithinBoard:
     self.board.fixedposition->forAll(p |
@@ -26,8 +20,6 @@ inv FixedPositionsWithinBoard:
         p.column <= self.board.size
     )
 
-
--- Every fixed position must correspond to a queen placed at the same coordinates
 context Problem
 inv FixedPositionsCorrespondToQueens:
     self.board.fixedposition->forAll(p |
@@ -37,8 +29,6 @@ inv FixedPositionsCorrespondToQueens:
         )
     )
 
-
--- No two distinct queens may share a row, column, or diagonal
 context Problem
 inv NoConflictingQueens:
     self.board.queen->forAll(q1 |
@@ -55,8 +45,6 @@ inv NoConflictingQueens:
         )
     )
 
-
--- Fixed positions must not conflict with each other
 context Problem
 inv NoConflictingFixedPositions:
     self.board.fixedposition->forAll(p1 |
