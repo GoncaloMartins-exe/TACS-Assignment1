@@ -35,3 +35,51 @@ Select one of the files in the `input/` directory (or create your own) and run:
 python pipeline.py <file-path>
 ```
 
+# Makefile Commands
+
+<table>
+  <tr>
+    <th>Command</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>
+
+```bash
+make run
+```
+
+</td>
+    <td>Run the pipeline sequentially on the 3 main test instances</td>
+  </tr>
+  <tr>
+    <td>
+
+```bash
+make validate
+```
+
+</td>
+    <td>Run the complete validation suite against the classical baseline</td>
+  </tr>
+  <tr>
+    <td>
+
+```bash
+make clean
+```
+
+</td>
+    <td>Clean generated output artifacts and Python caches</td>
+  </tr>
+  <tr>
+    <td>
+
+```bash
+make help
+```
+
+</td>
+    <td>Display all available commands</td>
+  </tr>
+</table>
