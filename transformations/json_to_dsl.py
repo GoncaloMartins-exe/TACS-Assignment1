@@ -96,6 +96,35 @@ def json_to_dsl(data: str) -> tuple[
 
     return (model, fixed_queens, size)
 
+def solution_to_dsl(
+    solution: list[tuple[int, int]],
+    board_size: int,
+    fixed_queens: set[tuple[int, int]] | list[tuple[int, int]]
+) -> ObjectModel:
+    fixed_set = set(fixed_queens)
+    problem = Problem("QueensSolution").attributes(name="NQueens_Solution_Problem").build()
+    board = Board(f"Board_{board_size}x{board_size}").attributes(size=board_size).build()
+    problem.board = board
+    board.problem = problem
+
+    queens = set()
+    fixedpos = set()
+
+    for i, (row, col) in enumerate(solution):
+        q_obj = Queen(f"queen_{i}").attributes(row=row, column=col).build()
+        queens.add(q_obj)
+        if (row, col) in fixed_set:
+            fp_obj = FixedPosition(f"fixed_pos_{i}").attributes(row=row, column=col).build()
+            fixedpos.add(fp_obj)
+
+    board.queen = queens
+    board.fixedposition = fixedpos
+
+    return ObjectModel(
+        name="SolutionProblemDSL",
+        objects={board, problem}.union(queens).union(fixedpos),
+    )
+
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         with open(sys.argv[1], "r") as f:
