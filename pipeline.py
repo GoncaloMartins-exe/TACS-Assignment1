@@ -2,7 +2,7 @@ import sys
 import math
 import runpy
 from pathlib import Path
-from transformations.json_to_dsl import json_to_dsl
+from transformations.json_to_dsl import json_to_dsl, solution_to_dsl
 from transformations.t1 import t1
 from transformations.t2 import t2
 from besser.generators.json import JSONObjectGenerator
@@ -94,6 +94,12 @@ def main():
     print("\033[0;33mT2: CNF -> Quantum Circuit...\033[0m")
     (quantum_model, qubit_mapping) = t2(cnf, group_size=config.group_size or None, iterations=config.rounds or None, solutions=len(baseline_solutions), debug=debug_t2)
 
+    # Circuits that exceed the limit of qubits
+    MAX_QUBITS = 22
+    if quantum_model.num_qubits > MAX_QUBITS:
+        print(f"\n\033[0;31mError: Circuit requires {quantum_model.num_qubits} qubits (simulation limit is {MAX_QUBITS}).\033[0m")
+        sys.exit(0)
+
     # Translate quantum model to Qiskit
     print("\033[0;33mT3: Quantum Circuit -> Qiskit...\033[0m")
     QiskitGenerator(quantum_model, output_dir="output", shots=config.shots).generate()
@@ -140,6 +146,10 @@ def main():
 
     # Compare the quantum result with the classical baseline
     print(format_metrics(quantum_metrics(counts, qubit_mapping, fixed_queens, board_size, baseline_solutions, config.rounds or None)))
+
+    # Maps the found solution back to the Problem DSL and persists it in JSON
+    solution_model = solution_to_dsl(solutions[0], board_size, fixed_queens)
+    JSONObjectGenerator(model=solution_model, output_dir="output/").generate()
 
 if __name__ == "__main__":
     main()
