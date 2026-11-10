@@ -1,5 +1,4 @@
 import sys
-import math
 import runpy
 from pathlib import Path
 from transformations.json_to_dsl import json_to_dsl, solution_to_dsl
@@ -10,21 +9,25 @@ from besser.generators.qiskit import QiskitGenerator
 from baseline import solve_nqueens, quantum_metrics, format_metrics
 from solver_config import load_solver_config
 
+MAX_QUBITS = 22
+
+
 def print_board(solution: list[tuple[int, int]], board_size: int, fixed_queens: list[tuple[int, int]] | set[tuple[int, int]] = ()):
-    """Visually renders the board in the terminal."""
+    """Visually renders the board in the terminal (rows top to bottom, columns left to right)."""
     grid = [["." for _ in range(board_size)] for _ in range(board_size)]
     fixed_set = set(fixed_queens)
     for r, c in solution:
         if (r, c) in fixed_set:
-            grid[c - 1][r - 1] = "\033[0;32mQ\033[0m"  # Fixed Queen (green)
+            grid[r - 1][c - 1] = "\033[0;32mQ\033[0m"  # Fixed Queen (green)
         else:
-            grid[c - 1][r - 1] = "Q"                  # Calculated Queen
-    
+            grid[r - 1][c - 1] = "Q"                  # Calculated Queen
+
     border = "+" + "---+" * board_size
     print(border)
     for row in grid:
         print("| " + " | ".join(row) + " |")
         print(border)
+
 
 def is_valid_solution(sol: list[tuple[int, int]]) -> bool:
     if len(sol) <= 1:
@@ -34,16 +37,6 @@ def is_valid_solution(sol: list[tuple[int, int]]) -> bool:
         return False
     return is_valid_solution(sol[1:])
 
-def grover_iterations(cnf) -> int:
-    literals = lambda d: d.literal if hasattr(d.literal, "__len__") else [d.literal]
-    squares = sorted({(o.row, o.column) for o in cnf.objects if o.classifier.name == "Literal"})
-    index = {s: i for i, s in enumerate(squares)}
-    clauses = [o for o in cnf.objects if o.classifier.name == "Disjunction"]
-    solutions = sum(
-        all(any(((x >> index[(l.row, l.column)]) & 1) == bool(l.queen) for l in literals(d)) for d in clauses)
-        for x in range(2 ** len(squares))
-    )
-    return math.floor(math.pi / 4 * math.sqrt(2 ** len(squares) / solutions)) if solutions else 0
 
 def main():
     filename = list(filter(lambda x: '--' not in x, sys.argv[1:]))
@@ -94,8 +87,7 @@ def main():
     print("\033[0;33mT2: CNF -> Quantum Circuit...\033[0m")
     (quantum_model, qubit_mapping) = t2(cnf, group_size=config.group_size or None, iterations=config.rounds or None, solutions=len(baseline_solutions), debug=debug_t2)
 
-    # Circuits that exceed the limit of qubits
-    MAX_QUBITS = 22
+    # Circuits that exceed the limit of qubits cannot be simulated: stop before generating/running the circuit
     if quantum_model.num_qubits > MAX_QUBITS:
         print(f"\n\033[0;31mError: Circuit requires {quantum_model.num_qubits} qubits (simulation limit is {MAX_QUBITS}).\033[0m")
         sys.exit(0)
@@ -122,20 +114,20 @@ def main():
     most_frequent = max(counts.values()) if counts else 0
     solution_bitstrings = {s for (s, count) in counts.items() if count > most_frequent * 0.1}
 
+    # Measured bitstring -> board (qubit i <-> square qubit_mapping[i], Qiskit is little-endian)
     solutions: list[list[tuple[int, int]]] = []
     for bitstring in solution_bitstrings:
         solution = list(fixed_queens)
-        for (bit, pos) in zip(reversed(bitstring), qubit_mapping):
+        for (bit, pos) in zip(reversed(bitstring.replace(" ", "")), qubit_mapping):
             if bit == '1':
                 solution.append(pos)
 
-        # ignore non-sensical solutions
-        if len(solution) == board_size:
-            solutions.append(solution)
+        # ignore non-sensical solutions: wrong number of queens or attacking queens
+        if len(solution) == board_size and is_valid_solution(solution):
+            solutions.append(sorted(solution, key=lambda x: x[0]))
 
     print("\n" + "="*40)
-    if solutions and is_valid_solution(solutions[0]):
-        solutions = [sorted(sol, key=lambda x: x[0]) for sol in solutions]
+    if solutions:
         print(f"\033[0;32mFound {len(solutions)} valid solution(s):\033[0m")
         for i, sol in enumerate(solutions, 1):
             print(f"\nSolution #{i}: {sol}")
@@ -147,9 +139,13 @@ def main():
     # Compare the quantum result with the classical baseline
     print(format_metrics(quantum_metrics(counts, qubit_mapping, fixed_queens, board_size, baseline_solutions, config.rounds or None)))
 
+    if not solutions:
+        sys.exit(0)
+
     # Maps the found solution back to the Problem DSL and persists it in JSON
     solution_model = solution_to_dsl(solutions[0], board_size, fixed_queens)
     JSONObjectGenerator(model=solution_model, output_dir="output/").generate()
+
 
 if __name__ == "__main__":
     main()
