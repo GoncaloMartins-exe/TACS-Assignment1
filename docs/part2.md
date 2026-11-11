@@ -58,7 +58,7 @@ This is because we not only need one qubit per variable, but also to mutually ex
 To mutually exclude variable 1 ($q_0 q_1$=00) with 5 (q2), we can use De Morgan's Laws and keep the CNF structure:
 
 $$
-(\neg(\neg q_0 \land \neg q_1) \lor \neg q2) = (\neg (\overline{q_0 \lor q_1}) \lor \neg q_2) = (q_0 \lor q_1 \lor \neg q_2)
+(\neg(\neg q_0 \land \neg q_1) \lor \neg q2) = (\neg \neg (q_0 \lor q_1) \lor \neg q_2) = (q_0 \lor q_1 \lor \neg q_2)
 $$
 
 Which can then be mapped to the following circuit:
