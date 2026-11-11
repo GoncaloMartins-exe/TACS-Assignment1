@@ -41,6 +41,10 @@ The classical backtracking solver, `solve_nqueens` in `baseline.py`, provides th
 
 All solutions were found for the satisfiable instances in these runs. The two impossible instances correctly produced no solutions.
 
+The execution looks as follows (set `config/config.json` to only build one oracle and therefore make circuit shorter, which is why estimated success probability is low):
+
+![Execution for 4x4 board with two queens](../assets/4x4_two_queens_one_round.png)
+
 ## Limitations
 
 The number of possible assignments grows exponentially with the number of data qubits, which limits classical simulation of large boards. The CNF oracle also needs ancillas to evaluate clauses and clause groups. Fixed queens reduce the search by removing cells that cannot contain another queen.
