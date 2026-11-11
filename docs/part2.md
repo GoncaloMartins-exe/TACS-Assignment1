@@ -45,7 +45,7 @@ All solutions were found for the satisfiable instances in these runs. The two im
 
 The number of possible assignments grows exponentially with the number of data qubits, which limits classical simulation of large boards. The CNF oracle also needs ancillas to evaluate clauses and clause groups. Fixed queens reduce the search by removing cells that cannot contain another queen.
 
-One potential improvement would be to reduce the amount of data qubits by mapping variables on the same line/column/diagonal into a binary number representation, where each number represents one of the variables. All variables in the same binary number mapping MUST be on the same line/column/diagonal to ensure there is exactly one outcome, otherwise the qubits lose meaning.
+One potential improvement would be to reduce the amount of data qubits by mapping variables on the same line/column/diagonal into a binary number representation of one or more qubits, where each value represents one of the variables. All variables in the same binary number mapping MUST be on the same line/column/diagonal to ensure there is exactly one outcome, otherwise the qubits lose meaning.
 
 The simplest form would be by having two mutually-exclusive variables represnted by a single qubit, where a 0 translates to one variable and a 1 to the other.
 
@@ -53,19 +53,19 @@ Multi-qubit mapping is possible by applying De Morgan's Laws: as an example, if 
 
 ![Example before data qubit optimization](../assets/before-qubit-optimized-4.png)
 
-This is because we not only need one qubit per variable, but also to mutually exclude every pair of variables from 1 to 4. If we instead map variables 1-4 into 2 qubits ($q_0$ and $q_1$), the output $q_0 q_1$ now represents the selected variable for the solution (00=1, 01=2, 10=3, 11=4), removing the $N^2$ pairwise clauses in the circuit.
+This is because we not only need one qubit per variable, but also to mutually exclude every pair of variables from 1 to 4. If we instead map variables 1-4 into 2 qubits ($q_0$ and $q_1$), the output $q_0 q_1$ now represents the selected variable for the solution (00=1, 01=2, 10=3, 11=4), removing the $O(N^2)$ pairwise clauses in the circuit (where $N$ is the number of variables being grouped).
 
-To mutually exclude variable 1 ($q_0 q_1$=00) with 5 (q2), we can use De Morgan's Laws and keep the CNF structure:
+To mutually exclude variable 1 ($q_0 q_1$=00) with 5 ($q_2$), we can use De Morgan's Laws and keep the CNF structure:
 
 $$
-(\neg(\neg q_0 \land \neg q_1) \lor \neg q2) = (\neg \neg (q_0 \lor q_1) \lor \neg q_2) = (q_0 \lor q_1 \lor \neg q_2)
+(\neg(\neg q_0 \land \neg q_1) \lor \neg q_2) = (\neg \neg (q_0 \lor q_1) \lor \neg q_2) = (q_0 \lor q_1 \lor \neg q_2)
 $$
 
 Which can then be mapped to the following circuit:
 
 ![Example after data qubit optimization](../assets/after-qubit-optimized-4.png)
 
-proving that this optimization can drastically reduce the amount of computation and qubits (not only data, but also ancillas) needed. If a mapping leaves meaningless values (e.g. if we map 3 variables into 2 qubits, $q_i q_j$=11 is meaningless), we can either ignore it or ensure the circuit itself rejects it ($\neg q_0 \lor \neg q_1$):
+proving that this optimization can drastically reduce the amount of computation and qubits needed. If a mapping leaves meaningless values (e.g. if we map 3 variables into 2 qubits, $q_i q_j$=11 is meaningless), we can either ignore/reject it in the results or ensure the circuit itself rejects it ($\neg q_0 \lor \neg q_1$):
 
 ![3 variables mapped to 2 qubits](../assets/after-qubit-optimized-3.png)
 
