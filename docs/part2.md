@@ -53,9 +53,9 @@ Multi-qubit mapping is possible by applying De Morgan's Laws: as an example, if 
 
 ![Example before data qubit optimization](../assets/before-qubit-optimized-4.png)
 
-This is because we not only need one qubit per variable, but also to mutually exclude every pair of variables from 1 to 4. If we instead map variables 1-4 into 2 qubits (q0 and q1), the output now represents the selected variable for the solution (00=1, 01=2, 10=3, 11=4), removing the $N^2$ pairwise clauses on the circuit.
+This is because we not only need one qubit per variable, but also to mutually exclude every pair of variables from 1 to 4. If we instead map variables 1-4 into 2 qubits ($q_0$ and $q_1$), the output $q_0 q_1$ now represents the selected variable for the solution (00=1, 01=2, 10=3, 11=4), removing the $N^2$ pairwise clauses in the circuit.
 
-To mutually exclude variable 1 (q0=0, q1=0) with 5 (q2), we can use De Morgan's Laws and keep the CNF structure:
+To mutually exclude variable 1 ($q_0 q_1$=00) with 5 (q2), we can use De Morgan's Laws and keep the CNF structure:
 
 $$
 (\neg(\neg q_0 \land \neg q_1) \lor \neg q2) = (\neg (\overline{q_0 \lor q_1}) \lor \neg q_2) = (q_0 \lor q_1 \lor \neg q_2)
@@ -63,6 +63,10 @@ $$
 
 Which can then be mapped to the following circuit:
 
-![Example after data qubit optimization](../assets/after-qubit-optimized.png)
+![Example after data qubit optimization](../assets/after-qubit-optimized-4.png)
 
-proving that this optimization can drastically reduce the amount of computation and qubits needed. Another problem, however, is in the selection of variables to map to the same group of data qubits, since there are multiple possible combinations and a naive one would not the optimal.
+proving that this optimization can drastically reduce the amount of computation and qubits (not only data, but also ancillas) needed. If a mapping leaves meaningless values (e.g. if we map 3 variables into 2 qubits, $q_i q_j$=11 is meaningless), we can either ignore it or ensure the circuit itself rejects it ($\neg q_0 \lor \neg q_1$):
+
+![3 variables mapped to 2 qubits](../assets/after-qubit-optimized-3.png)
+
+Another optimization problem, however, is in the selection of variables to map to the same group of data qubits, since there are multiple possible combinations and a naive approach would not be optimal (and an optimal one is likely NP-hard).
