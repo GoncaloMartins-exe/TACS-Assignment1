@@ -4,11 +4,11 @@ Group TACS_G12
 
 ## T2: CNF to Quantum Circuit
 
-`transformations/t2.py` converts the CNF model into a platform-independent BESSER quantum circuit.
-
+`transformations/t2.py` converts the CNF model into a platform-independent BESSER quantum circuit. A CNF can be mapped to a Grover Circuit as follows:
 - Each candidate board cell in the CNF gets a **data qubit**. A value of 1 means a queen is placed; 0 means the cell is empty.
-- Extra **ancilla qubits** are used to check clauses and combine their results. By default, clauses are split into groups of about $\sqrt{C}$, where $C$ is the number of clauses. The group size can also be set in the solver configuration.
 - Hadamard gates put the data qubits into a superposition of all $2^n$ assignments.
+- A clause is mapped as a multi-controlled X gate (MCX), where the target qubit is an ancilla and its control qubits are the variables in the clause (Control=negation, Anti-Control=not negated).
+- By default, clauses are split into groups of about $\sqrt{C}$, where $C$ is the number of clauses. The group size can also be set in the solver configuration. Each group of clauses is handled by a single ancilla. A smaller amount of ancillas leads to longer circuits, and vice-versa.
 - The oracle checks the CNF, flips the phase of satisfying assignments, and clears the ancillas. The diffuser then amplifies those assignments. These steps are repeated for the selected number of Grover rounds, and the data qubits are measured.
 
 If the number of rounds is not set in the configuration, T2 calculates it from $n$, the number of data qubits, and $M$, the number of solutions found by the classical solver:
@@ -44,3 +44,25 @@ All solutions were found for the satisfiable instances in these runs. The two im
 ## Limitations
 
 The number of possible assignments grows exponentially with the number of data qubits, which limits classical simulation of large boards. The CNF oracle also needs ancillas to evaluate clauses and clause groups. Fixed queens reduce the search by removing cells that cannot contain another queen.
+
+One potential improvement would be to reduce the amount of data qubits by mapping variables on the same line/column/diagonal into a binary number representation, where each number represents one of the variables. All variables in the same binary number mapping MUST be on the same line/column/diagonal to ensure there is exactly one outcome, otherwise the qubits lose meaning.
+
+The simplest form would be by having two mutually-exclusive variables represnted by a single qubit, where a 0 translates to one variable and a 1 to the other.
+
+Multi-qubit mapping is possible by applying De Morgan's Laws: as an example, if we wish to select exactly one variable out of 4, and make it so variable 1 is mutually exclusive with a 5th variable, our current approach would create a circuit like this:
+
+![Example before data qubit optimization](../assets/before-qubit-optimized-4.png)
+
+This is because we not only need one qubit per variable, but also to mutually exclude every pair of variables from 1 to 4. If we instead map variables 1-4 into 2 qubits (q0 and q1), the output now represents the selected variable for the solution (00=1, 01=2, 10=3, 11=4), removing the $N^2$ pairwise clauses on the circuit.
+
+To mutually exclude variable 1 (q0=0, q1=0) with 5 (q2), we can use De Morgan's Laws and keep the CNF structure:
+
+$$
+(\neg(\neg q_0 \land \neg q_1) \lor \neg q2) = (\neg (\overline{q_0 \lor q_1}) \lor \neg q_2) = (q_0 \lor q_1 \lor \neg q_2)
+$$
+
+Which can then be mapped to the following circuit:
+
+![Example after data qubit optimization](../assets/after-qubit-optimized.png)
+
+proving that this optimization can drastically reduce the amount of computation and qubits needed. Another problem, however, is in the selection of variables to map to the same group of data qubits, since there are multiple possible combinations and a naive one would not the optimal.
